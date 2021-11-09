@@ -1,0 +1,1 @@
+Dfull = load('datos.csv');
