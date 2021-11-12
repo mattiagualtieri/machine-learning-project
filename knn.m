@@ -1,5 +1,5 @@
-% load data from 'datos.csv' file
-D = load('datos.csv');
+% load data from 'data.csv' file
+D = load('data.csv');
 
 % X matrix
 X = D(:,4:end);
