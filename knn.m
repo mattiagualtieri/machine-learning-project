@@ -10,14 +10,14 @@ Y = D(:,1);
 Xs = scaleData(X);
 Xn = normalizeData(Xs);
 
-% split X in Xtest and Xtrain (25% test, 75% train)
-cvx = cvpartition(size(Xn, 1), 'HoldOut', 0.25);
+% split X in Xtest and Xtrain (10% test, 90% train)
+cvx = cvpartition(size(Xn, 1), 'HoldOut', 0.1);
 index = cvx.test;
 Xtrain = Xn(~index,:);
 Xtest = Xn(index,:);
 
-% split Y in Ytest and Ytrain (25% test, 75% train)
-cvy = cvpartition(size(Y, 1), 'HoldOut', 0.25);
+% split Y in Ytest and Ytrain (10% test, 90% train)
+cvy = cvpartition(size(Y, 1), 'HoldOut', 0.1);
 index = cvy.test;
 Ytrain = Y(~index,:);
 Ytest = Y(index,:);
@@ -41,10 +41,10 @@ index = 1;
 for k = 2:2:12
     [cIdx] = knnsearch(Xtrainval, Xval, 'K', k, 'Distance', 'euclidean');
     LabelsPerPattern = Ytrain(cIdx);
-    LabelsKNN = mode(LabelsPerPattern')';
+    Ypredicted = mode(LabelsPerPattern')';
     [H, ~] = size(Yval);
-    ccr = sum(LabelsKNN == Yval)/H;
-    error(index) = ccr;
+    C = sum(Ypredicted == Yval)/H;
+    error(index) = C;
     index = index + 1;
 end
 
@@ -54,9 +54,17 @@ K = (2*Kindex) - 1;
 % execute k-NN with the optimal K value (K)
 [cIdx] = knnsearch(Xtrain, Xtest, 'K', k, 'Distance', 'euclidean');
 LabelsPerPattern = Ytrain(cIdx);
-LabelsKNN = mode(LabelsPerPattern')';
+Ypredicted = mode(LabelsPerPattern')';
 [H, ~] = size(Ytest);
-ccr = sum(LabelsKNN == Ytest)/H;
+
+% C --> correct cassification rate
+C = sum(Ypredicted == Ytest)/H;
+% MAE --> mean absolute error
+MAE = sum(abs(Ypredicted - Ytest))/H;
+% tau --> the Kendall's tau
+tau = corr(Ypredicted, Ytest, 'type', 'Kendall');
+% MMAE --> maximum MAE
+MMAE = max(abs(Ypredicted - Ytest));
 
 % --- functions ---
 
