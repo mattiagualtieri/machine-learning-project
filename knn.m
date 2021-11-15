@@ -3,7 +3,7 @@ D = load('data.csv');
 
 % X matrix
 X = D(:,4:end);
-% Y contains only S&P column
+% Y contain only S&P column
 Y = D(:,1);
 
 % X scaling and normalization
