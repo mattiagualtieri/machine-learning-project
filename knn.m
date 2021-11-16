@@ -1,3 +1,7 @@
+% Initial configuration 
+clear all;
+rng(1);
+
 % load data from 'data.csv' file
 D = load('data.csv');
 
@@ -10,17 +14,16 @@ Y = D(:,1);
 Xs = scaleData(X);
 Xn = normalizeData(Xs);
 
-% split X in Xtest and Xtrain (10% test, 90% train)
-cvx = cvpartition(size(Xn, 1), 'HoldOut', 0.1);
-index = cvx.test;
-Xtrain = Xn(~index,:);
-Xtest = Xn(index,:);
+% split X in Xtest and Xtrain
+% using 2007, 2008 and 2009 data for training
+% using 2010 data for test
+Xtrain = Xn(1:81,:);
+Xtest = Xn(82:end,:);
 
-% split Y in Ytest and Ytrain (10% test, 90% train)
-cvy = cvpartition(size(Y, 1), 'HoldOut', 0.1);
-index = cvy.test;
-Ytrain = Y(~index,:);
-Ytest = Y(index,:);
+% split Y in Ytest and Ytrain
+% same here as X
+Ytrain = Y(1:81,:);
+Ytest = Y(82:end,:);
 
 % split Xtrain into Xtrainval and Xval (25% val, 75% trainval)
 cv = cvpartition(size(Xtrain, 1), 'HoldOut', 0.25);
@@ -43,8 +46,8 @@ for k = 2:2:12
     LabelsPerPattern = Ytrain(cIdx);
     Ypredicted = mode(LabelsPerPattern')';
     [H, ~] = size(Yval);
-    C = sum(Ypredicted == Yval)/H;
-    error(index) = C;
+    CCR = sum(Ypredicted == Yval)/H;
+    error(index) = CCR;
     index = index + 1;
 end
 
@@ -57,8 +60,8 @@ LabelsPerPattern = Ytrain(cIdx);
 Ypredicted = mode(LabelsPerPattern')';
 [H, ~] = size(Ytest);
 
-% C --> correct cassification rate
-C = sum(Ypredicted == Ytest)/H;
+% CCR --> correct cassification rate
+CCR = sum(Ypredicted == Ytest)/H;
 % MAE --> mean absolute error
 MAE = sum(abs(Ypredicted - Ytest))/H;
 % tau --> the Kendall's tau
