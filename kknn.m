@@ -29,8 +29,6 @@ printResults('Fitch', CCR, MAE, MMAE, tau);
 
 % Kernel K-NN function
 function [CCR, MAE, MMAE, tau] = kernelKNN(X, Y)
-
-    [N, ~] = size(X);
     
     % scaling and normalization of X
     Xs = scaleData(X);
@@ -74,7 +72,7 @@ function [CCR, MAE, MMAE, tau] = kernelKNN(X, Y)
             [H, ~] = size(Yval);
             CCR = sum(Ypredicted == Yval)/H;
             error(i, j) = CCR;
-            j = j + 1;     
+            j = j + 1;
         end
         i = i + 1; 
     end
