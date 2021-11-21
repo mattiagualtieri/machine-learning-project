@@ -12,15 +12,15 @@ fprintf('\t\t\tCCR\t\t\tMAE\t\t\tMMAE\t\ttau\n');
 X = D(:,4:end);
 % Y = S&P
 Y = D(:,1);
-[CCR, MAE, MMAE, tau] = RELM(X, Y);
+[CCR, MAE, MMAE, tau] = ELM(X, Y);
 printResults('S&P    ', CCR, MAE, MMAE, tau);
 % Y = Moodys
 Y = D(:,2);
-[CCR, MAE, MMAE, tau] = RELM(X, Y);
+[CCR, MAE, MMAE, tau] = ELM(X, Y);
 printResults('Moodys', CCR, MAE, MMAE, tau);
 % Y = Fitch
 Y = D(:,3);
-[CCR, MAE, MMAE, tau] = RELM(X, Y);
+[CCR, MAE, MMAE, tau] = ELM(X, Y);
 printResults('Fitch', CCR, MAE, MMAE, tau);
 
 % --- functions ---
@@ -62,7 +62,7 @@ function [Doptimal] = findOptimalD(X, Y, N, K)
 end
 
 % Regularized Extreme Learning Machine function
-function [CCR, MAE, MMAE, tau] = RELM(X, Y)
+function [CCR, MAE, MMAE, tau] = ELM(X, Y)
     [~, K] = size(X);
     J = numel(unique(Y));
 
@@ -78,7 +78,7 @@ function [CCR, MAE, MMAE, tau] = RELM(X, Y)
     [Ntrain, ~] = size(Xtrain);
     [Ntest, ~] = size(Xtest);
 
-    % split Y in Ytest and Ytrain
+    % split Y in Ytesting and Ytraining
     % same here as X
     Ytraining = Y(1:81,:);
     Ytesting = Y(82:end,:);
@@ -105,8 +105,8 @@ function [CCR, MAE, MMAE, tau] = RELM(X, Y)
     % Calculate H (N x D)
     Htrain = 1./(1+(exp(-(Xtrain * W))));
     Htest = 1./(1+(exp(-(Xtest * W))));
-    % Generate Beta (D x J)
-    Beta = (inv((Htrain'*Htrain) +(delta*eye(size(Htrain, 2)))))*Htrain'*Ytrain;
+    % Generate Beta = (H'*H)^-1 * H'*Y  (D x J)
+    Beta = (inv((Htrain'*Htrain) + (delta*eye(size(Htrain, 2)))))*Htrain'*Ytrain;
     % Calculate Y (N x J)
     Ypredicted = Htest*Beta;
 
