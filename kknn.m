@@ -93,7 +93,7 @@ function [CCR, MAE, MMAE, tau] = kernelKNN(X, Y)
     % MAE --> mean absolute error
     MAE = sum(abs(Ypredicted - Ytest))/H;
     % tau --> the Kendall's tau
-    tau = 0; %corr(Ypredicted, Ytest, 'type', 'Kendall');
+    tau = 0;%corr(Ypredicted, Ytest, 'type', 'Kendall');
     % MMAE --> maximum MAE
     MMAE = max(abs(Ypredicted - Ytest));
 

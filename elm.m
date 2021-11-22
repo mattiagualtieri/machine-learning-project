@@ -39,22 +39,27 @@ function [Doptimal] = findOptimalD(X, Y, N, K)
     Ntest = cv.TestSize;
     
     % Find optimal hyperparameter D
-    arrayCost = [];
+    arrayCost = zeros(20, 2) + 50000;
     delta = 10e-3;
+    i = 1;
     for D = 50:50:1000
-        % Generate random W (NxK)
+        % Generate random W (K x D)
         W = rand(K, D)*2-1;
-        % Calculate H=X*w (NxD)
+        % Calculate H = X * W (N x D)
         Htrain = 1./(1+(exp(-(Xtrain * W))));
         Htest = 1./(1+(exp(-(Xtest * W))));
-        % Calculate Beta = (H'*H)^-1 * H'*Y
-        Beta = (inv((Htrain'*Htrain) +(delta*eye(size(Htrain, 2)))))*Htrain'*Ytrain;
+        % Calculate Beta = (H'*H)^-1 * H'*Y (D x J)
+        Beta = (inv((Htrain'*Htrain) +(delta * eye(size(Htrain, 2)))))*Htrain'*Ytrain;
         % Generate Y = H*Beta
         Ypredicted = Htest*Beta;
         % Calculate cost L
-        L = norm((Htest*Beta)-Ypredicted)^2;
+        % what is this L???
+        L = norm((Htest*Beta) - Ypredicted)^2;
         row = [L D];
-        arrayCost = [arrayCost;row];
+        % every step we add arrayCost the row [L D]
+        arrayCost(i, 1) = L;
+        arrayCost(i, 2) = D;
+        i = i + 1;
     end
     
     [~, indexMin] = min(arrayCost(:,1));
@@ -100,7 +105,7 @@ function [CCR, MAE, MMAE, tau] = ELM(X, Y)
 
     % Apply Extreme Learning Machine Algorithm
     delta = 10e-3;
-    % Generate w (K x D)
+    % Generate W (K x D)
     W = rand(K, D)*2-1;
     % Calculate H (N x D)
     Htrain = 1./(1+(exp(-(Xtrain * W))));
