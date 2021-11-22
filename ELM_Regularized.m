@@ -23,21 +23,27 @@ Ytest1 = generate1ofJLabel(Ytest1,Ntest,J);
 Ytest2 = generate1ofJLabel(Ytest2,Ntest,J);
 Ytest3 = generate1ofJLabel(Ytest3,Ntest,J);
 
-% Get optimal value of C and D
+% Get optimal value of C and D agency 1
 [C_optimal1,D_optimal1] = findOptimalHyperparameters(Xtrain,Ytrain1,Ntrain,K);
-[C_optimal2,D_optimal2] = findOptimalHyperparameters(Xtrain,Ytrain1,Ntrain,K);
-[C_optimal3,D_optimal3] = findOptimalHyperparameters(Xtrain,Ytrain1,Ntrain,K);
-
-% Apply Extreme Learning Machine 
+% Apply Extreme Learning Machine agency 1
 [Ypredicted1,CCR1,CCR_ELM1] = extremeLearningMachine(Xtrain,Ytrain1,Xtest,Ytest1,Ntrain,Ntest,K,C_optimal1,D_optimal1);
-[Ypredicted2,CCR2,CCR_ELM2] = extremeLearningMachine(Xtrain,Ytrain2,Xtest,Ytest2,Ntrain,Ntest,K,C_optimal2,D_optimal2);
-[Ypredicted3,CCR3,CCR_ELM3] = extremeLearningMachine(Xtrain,Ytrain3,Xtest,Ytest3,Ntrain,Ntest,K,C_optimal3,D_optimal3);
-
-% Show results
+% Show results agency 1
 disp("RATE AGENCY 1) S&P: ")
 showResult(C_optimal1,D_optimal1,CCR1,CCR_ELM1);
+
+% Get optimal value of C and D agency 2
+[C_optimal2,D_optimal2] = findOptimalHyperparameters(Xtrain,Ytrain1,Ntrain,K);
+% Apply Extreme Learning Machine agency 2
+[Ypredicted2,CCR2,CCR_ELM2] = extremeLearningMachine(Xtrain,Ytrain2,Xtest,Ytest2,Ntrain,Ntest,K,C_optimal2,D_optimal2);
+% Show results agency 2
 disp("RATE AGENCY 2) Moodys: ")
 showResult(C_optimal2,D_optimal2,CCR2,CCR_ELM2);
+
+% Get optimal value of C and D agency 3
+[C_optimal3,D_optimal3] = findOptimalHyperparameters(Xtrain,Ytrain1,Ntrain,K);
+% Apply Extreme Learning Machine agency 3
+[Ypredicted3,CCR3,CCR_ELM3] = extremeLearningMachine(Xtrain,Ytrain3,Xtest,Ytest3,Ntrain,Ntest,K,C_optimal3,D_optimal3);
+% Show results agency 3
 disp("RATE AGENCY 3) Fitch: ")
 showResult(C_optimal3,D_optimal3,CCR3,CCR_ELM3);
 
@@ -73,7 +79,7 @@ function [C_optimal,D_optimal] = findOptimalHyperparameters(Xtrain,Ytrain,Ntrain
     
     % Find optimal hyperparameter D
     arrayCost = [];
-    C = 10e-3;
+    C = 10e-7;
     while C <= 10e3
         for D=50:50:1000
             % Generate random w (NxK)
@@ -86,7 +92,8 @@ function [C_optimal,D_optimal] = findOptimalHyperparameters(Xtrain,Ytrain,Ntrain
             % Generate Y = H*Beta
             Ypredicted = Htest*Beta;
             % Calculate cost L
-            L = ((norm(Beta))^2) + (C*(norm((Htest*Beta)-Ypredicted))^2);
+            % L = ((norm(Beta))^2) + (C*(norm((Htest*Beta)-Ypredicted))^2);
+            L = norm(YtestVal - Ypredicted);
             row = [L C D];
             arrayCost = [arrayCost;row]; %#ok
         end
