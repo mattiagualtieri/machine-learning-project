@@ -16,24 +16,29 @@ dataset = xlsread('BD_COUNTRY_RISK_EU.ods','BDTOTAL');
 % Prepare data
 [Xtrain,Ytrain1,Ytrain2,Ytrain3,Ntrain,Xtest,Ytest1,Ytest2,Ytest3,Ntest,N,J,K] = initData(dataset);
 
-% Find optimal value of k neighbours and sigma parameter
-%k1 = findOptimalNeighbours(Xtrain,Ytrain1,Ntrain);
-%k2 = findOptimalNeighbours(Xtrain,Ytrain2,Ntrain);
-k3 = findOptimalNeighbours(Xtrain,Ytrain3,Ntrain);
-
-% Apply Kernel Knn Algorithm
-%[Ypredicted1,CCR1] = kernelKnnAlgorithm(Xtrain,Xtest,k1,Ytrain1,Ytest1,Ntest);
-% [Ypredicted2,CCR2] = kernelKnnAlgorithm(Xtrain,Xtest,k2,Ytrain2,Ytest2,Ntest);
-[Ypredicted3,CCR3] = kernelKnnAlgorithm(Xtrain,Xtest,k3,Ytrain3,Ytest3,Ntest);
-
-% Show results
+% Find optimal value of k neighbours and sigma parameter agency 1
+k1 = findOptimalNeighbours(Xtrain,Ytrain1,Ntrain);
+% Apply Kernel Knn Algorithm agency 1
+[Ypredicted1,CCR1] = kernelKnnAlgorithm(Xtrain,Xtest,k1,Ytrain1,Ytest1,Ntest);
+% Show results agency 1
 disp("RATE AGENCY 1) S&P: ")
-%showResult(k1,CCR1);
+showResult(k1,CCR1);
+
+% Find optimal value of k neighbours and sigma parameter agency 2
+k2 = findOptimalNeighbours(Xtrain,Ytrain2,Ntrain);
+% Apply Kernel Knn Algorithm agency 2
+[Ypredicted2,CCR2] = kernelKnnAlgorithm(Xtrain,Xtest,k2,Ytrain2,Ytest2,Ntest);
+% Show results agency 2
 disp("RATE AGENCY 2) Moodys: ")
-%showResult(k2,CCR2);
+showResult(k2,CCR2);
+
+% Find optimal value of k neighbours and sigma parameter agency 3
+k3 = findOptimalNeighbours(Xtrain,Ytrain3,Ntrain);
+% Apply Kernel Knn Algorithm agency 3
+[Ypredicted3,CCR3] = kernelKnnAlgorithm(Xtrain,Xtest,k3,Ytrain3,Ytest3,Ntest);
+% Show results agency 3
 disp("RATE AGENCY 3) Fitch: ")
 showResult(k3,CCR3);
-
 % ===========================================================  %
 
 
