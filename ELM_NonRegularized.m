@@ -23,24 +23,29 @@ Ytest1 = generate1ofJLabel(Ytest1,Ntest,J);
 Ytest2 = generate1ofJLabel(Ytest2,Ntest,J);
 Ytest3 = generate1ofJLabel(Ytest3,Ntest,J);
 
-% Get optimal value of D
+% Get optimal value of D agency 1
 D_optimal1 = findOptimalD(Xtrain,Ytrain1,Ntrain,K);
-D_optimal2 = findOptimalD(Xtrain,Ytrain1,Ntrain,K);
-D_optimal3 = findOptimalD(Xtrain,Ytrain1,Ntrain,K);
-
-% Apply Extreme Learning Machine 
+% Apply Extreme Learning Machine agency 1
 [Ypredicted1,CCR1,CCR_ELM1] = extremeLearningMachine(Xtrain,Ytrain1,Xtest,Ytest1,Ntrain,Ntest,K,D_optimal1);
-[Ypredicted2,CCR2,CCR_ELM2] = extremeLearningMachine(Xtrain,Ytrain2,Xtest,Ytest2,Ntrain,Ntest,K,D_optimal2);
-[Ypredicted3,CCR3,CCR_ELM3] = extremeLearningMachine(Xtrain,Ytrain3,Xtest,Ytest3,Ntrain,Ntest,K,D_optimal3);
-
-% Show results
+% Show results agency 1
 disp("RATE AGENCY 1) S&P: ")
 showResult(D_optimal1,CCR1,CCR_ELM1);
+
+% Get optimal value of D agency 2
+D_optimal2 = findOptimalD(Xtrain,Ytrain1,Ntrain,K);
+% Apply Extreme Learning Machine agency 2
+[Ypredicted2,CCR2,CCR_ELM2] = extremeLearningMachine(Xtrain,Ytrain2,Xtest,Ytest2,Ntrain,Ntest,K,D_optimal2);
+% Show results agency 2
 disp("RATE AGENCY 2) Moodys: ")
 showResult(D_optimal2,CCR2,CCR_ELM2);
+
+% Get optimal value of D agency 3
+D_optimal3 = findOptimalD(Xtrain,Ytrain1,Ntrain,K);
+% Apply Extreme Learning Machine agency 3
+[Ypredicted3,CCR3,CCR_ELM3] = extremeLearningMachine(Xtrain,Ytrain3,Xtest,Ytest3,Ntrain,Ntest,K,D_optimal3);
+% Show results agency 3
 disp("RATE AGENCY 3) Fitch: ")
 showResult(D_optimal3,CCR3,CCR_ELM3);
-
 % ===========================================================  %
 
 % ===========================================================  %
@@ -73,7 +78,7 @@ function D_optimal = findOptimalD(Xtrain,Ytrain,Ntrain,K)
     
     % Find optimal hyperparameter D
     arrayCost = [];
-    delta = 10e-3;
+    delta = 10e-7;
     for D=50:50:1000
         % Generate random w (NxK)
         w = rand(K,D)*2-1;
@@ -85,7 +90,8 @@ function D_optimal = findOptimalD(Xtrain,Ytrain,Ntrain,K)
         % Generate Y = H*Beta
         Ypredicted = Htest*Beta;
         % Calculate cost L
-        L = norm((Htest*Beta)-Ypredicted)^2;
+        % L = norm((Htest*Beta)-Ypredicted)^2;
+        L = norm(YtestVal - Ypredicted);
         row = [L D];
         arrayCost = [arrayCost;row]; %#ok
     end
