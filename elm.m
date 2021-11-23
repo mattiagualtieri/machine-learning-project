@@ -53,9 +53,7 @@ function [Doptimal] = findOptimalD(X, Y, N, K)
         % Generate Y = H*Beta
         Ypredicted = Htest*Beta;
         % Calculate cost L
-        % what is this L???
-        L = norm((Htest*Beta) - Ypredicted)^2;
-        row = [L D];
+        L = norm(Ytest- Ypredicted);
         % every step we add arrayCost the row [L D]
         arrayCost(i, 1) = L;
         arrayCost(i, 2) = D;
@@ -101,6 +99,7 @@ function [CCR, MAE, MMAE, tau] = ELM(X, Y)
         Ytest(i, column) = 1;
     end
     
+    % D must be optimal
     D = findOptimalD(Xtrain, Ytrain, Ntrain, K);
 
     % Apply Extreme Learning Machine Algorithm

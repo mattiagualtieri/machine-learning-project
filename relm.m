@@ -27,7 +27,7 @@ printResults('Fitch', CCR, MAE, MMAE, tau);
 
 % Regularized Extreme Learning Machine function
 function [CCR, MAE, MMAE, tau] = RELM(X, Y)
-    [N, K] = size(X);
+    [~, K] = size(X);
     J = numel(unique(Y));
 
     % X scaling and normalization
@@ -91,7 +91,7 @@ function [CCR, MAE, MMAE, tau] = RELM(X, Y)
             % Ypredicted = H * Beta
             Ypredicted = Htest * Beta;
             % Parameters matrix
-            L = ((norm(Beta))^2) + (C*(norm((Htest * Beta) - Ypredicted))^2);
+            L = norm(Ytestval - Ypredicted);
             row = [C D L];
             parametersMatrix = [parametersMatrix; row];
         end
