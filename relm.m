@@ -25,10 +25,80 @@ printResults('Fitch', CCR, MAE, MMAE, tau);
 
 % --- functions ---
 
+% From column to matrix function
+function [Y] = fromColumnToMatrix(Yoriginal)
+    [N, ~] = size(Yoriginal);
+    J = numel(unique(Yoriginal));
+    Y = zeros(N, J);
+    for i = 1:N
+        column = Yoriginal(i);
+        Y(i, column) = 1;
+    end
+end
+
+function [Y] = fromMatrixToColumn(Yoriginal)
+    H = size(Yoriginal, 1);
+    Y = zeros(H, 1);
+    for i = 1:H
+        [~, position] = max(Yoriginal(i,:));
+        Y(i) = position;
+    end
+end
+
+% Find optimal hyperparameters function
+function [C, D] = findOptimalHyperparameters(X, Y)
+
+    [N, K] = size(X);
+    % split into test and train (25% val, 75% trainval)
+    cv = cvpartition(N, 'HoldOut', 0.25);
+    index = cv.test;
+    Xtrain = X(~index,:);
+    Ytrain = Y(~index,:);
+    Xtest = X(index,:);
+    Ytest = Y(index,:);
+    Ntrain = cv.TrainSize;
+    Ntest = cv.TestSize;
+    
+    C = 10e-3;
+    parametersMatrix = zeros(20, 2);
+    i = 1;
+    while C <= 10e3
+        for D = 50:50:1000
+            % Get W random matrix (K x D)
+            W = rand(K, D)*2 - 1;
+            % Bias
+            bias_train_vector = rand(Ntrain, 1);
+            bias_train = bias_train_vector(:,ones(1, D));
+            bias_test_vector = rand(Ntest, 1);
+            bias_test = bias_test_vector(:,ones(1, D));
+            % Compute H
+            Htrain = 1 ./ (1 + (exp(-(Xtrain * W + bias_train))));
+            Htest = 1 ./ (1 + (exp(-(Xtest * W + bias_test))));
+            % Get Beta matrix (D x J)
+            Beta = (inv((eye(D)/C)+(Htrain'*Htrain)))*(Htrain'*Ytrain);
+            % Ypredicted = H * Beta
+            Ypredicted = Htest * Beta;
+            % Parameters matrix
+            L = norm(Ytest - Ypredicted);
+            % every step we add arrayCost the row [L D]
+            parametersMatrix(i, 1) = C;
+            parametersMatrix(i, 2) = D;
+            parametersMatrix(i, 3) = L;
+            i = i + 1;
+        end
+        C = C * 10;
+    end
+
+    % Find optimal C and D
+    [~, index] = min(parametersMatrix(:,3));
+    C = parametersMatrix(index, 1);
+    D = parametersMatrix(index, 2);
+end
+
 % Regularized Extreme Learning Machine function
 function [CCR, MAE, MMAE, tau] = RELM(X, Y)
+
     [~, K] = size(X);
-    J = numel(unique(Y));
 
     % X scaling and normalization
     Xs = scaleData(X);
@@ -44,64 +114,12 @@ function [CCR, MAE, MMAE, tau] = RELM(X, Y)
 
     % split Y in Ytest and Ytrain
     % same here as X
-    Ytraining = Y(1:81,:);
-    Ytesting = Y(82:end,:);
+    % note: for the training set, we translate the only column of Y into a matrix
+    % note: the matrix is (Ntrain x J)
+    Ytrain = fromColumnToMatrix(Y(1:81,:));
+    Ytest = Y(82:end,:);
 
-    % didn't get this step
-    Ytrain = zeros(Ntrain, J);
-    for i = 1:Ntrain
-        column = Ytraining(i);
-        Ytrain(i, column) = 1;
-    end
-
-    Ytest = zeros(Ntest, J);
-    for i = 1:Ntest
-        column = Ytesting(i);
-        Ytest(i, column) = 1;
-    end
-
-    % split into testval and trainval (25% val, 75% trainval)
-    cv = cvpartition(Ntrain, 'HoldOut', 0.25);
-    index = cv.test;
-    Xtrainval = Xtrain(~index,:);
-    Ytrainval = Ytrain(~index,:);
-    Xtestval = Xtrain(index,:);
-    Ytestval = Ytrain(index,:);
-    Ntrainval = cv.TrainSize;
-    Ntestval = cv.TestSize;
-
-    % Find optimal hyperparameters C and D
-    C = 10e-3;
-    parametersMatrix = [];
-
-    while C <= 10e3
-        for D = 50:50:1000
-            % Get W random matrix (K x D)
-            W = rand(K, D)*2 - 1;
-            % Bias
-            bias_train_vector = rand(Ntrainval, 1);
-            bias_train = bias_train_vector(:,ones(1, D));
-            bias_test_vector = rand(Ntestval, 1);
-            bias_test = bias_test_vector(:,ones(1, D));
-            % Compute H
-            Htrain = 1 ./ (1 + (exp(-(Xtrainval * W + bias_train))));
-            Htest = 1 ./ (1 + (exp(-(Xtestval * W + bias_test))));
-            % Get Beta matrix (D x J)
-            Beta = (inv((eye(D)/C)+(Htrain'*Htrain)))*(Htrain'*Ytrainval);
-            % Ypredicted = H * Beta
-            Ypredicted = Htest * Beta;
-            % Parameters matrix
-            L = norm(Ytestval - Ypredicted);
-            row = [C D L];
-            parametersMatrix = [parametersMatrix; row];
-        end
-        C = C*10;
-    end
-
-    % Find optimal C and D
-    [~, index] = min(parametersMatrix(:,3));
-    Coptimal = parametersMatrix(index, 1);
-    Doptimal = parametersMatrix(index, 2);
+    [Coptimal, Doptimal] = findOptimalHyperparameters(Xtrain, Ytrain);
 
     % Apply Extreme Learning Machine Algorithm
     W = rand(K, Doptimal)*2 - 1;
@@ -111,24 +129,23 @@ function [CCR, MAE, MMAE, tau] = RELM(X, Y)
     bias_test = bias_test_vector(:,ones(1, Doptimal));
     Htrain = 1 ./ (1 + (exp(-(Xtrain * W + bias_train))));
     Htest = 1 ./ (1 + (exp(-(Xtest * W + bias_test))));
-    Beta = (inv((eye(Doptimal)/Coptimal)+(Htrain'*Htrain)))*(Htrain'*Ytrain);
+    % Beta = [(H'*H + I/C)^-1] * (H' * Y)
+    % note: Beta is (D x J)
+    % note: eye(D) creates a diagonal identity matrix (D x D)
+    Beta = (inv(((Htrain'*Htrain) + eye(Doptimal)/Coptimal))) * (Htrain'*Ytrain);
     Ypredicted = Htest * Beta;
 
-    H = size(Ypredicted, 1);
-    predicts = zeros(H, 1);
-    for i = 1:size(Ypredicted, 1)
-        [~, position] = max(Ypredicted(i,:));
-        predicts(i) = position;
-    end
+    predicts = fromMatrixToColumn(Ypredicted);
+    H = size(predicts, 1);
     
     % CCR --> correct cassification rate
-    CCR = sum(predicts == Ytesting)/H;
+    CCR = sum(predicts == Ytest)/H;
     % MAE --> mean absolute error
-    MAE = sum(abs(predicts - Ytesting))/H;
+    MAE = sum(abs(predicts - Ytest))/H;
     % tau --> the Kendall's tau
-    tau = corr(predicts, Ytesting, 'type', 'Kendall');
+    tau = corr(predicts, Ytest, 'type', 'Kendall');
     % MMAE --> maximum MAE
-    MMAE = max(abs(predicts - Ytesting));
+    MMAE = max(abs(predicts - Ytest));
     
 end
 

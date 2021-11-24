@@ -26,8 +26,9 @@ printResults('Fitch', CCR, MAE, MMAE, tau);
 % --- functions ---
 
 % Find optimal D function
-function [Doptimal] = findOptimalD(X, Y, N, K)
+function [Doptimal] = findOptimalD(X, Y)
 
+    [N, K] = size(X);
     % split into train and test (25% test, 75% train)
     cv = cvpartition(N, 'HoldOut', 0.25);
     index = cv.test;
@@ -39,15 +40,15 @@ function [Doptimal] = findOptimalD(X, Y, N, K)
     Ntest = cv.TestSize;
     
     % Find optimal hyperparameter D
-    arrayCost = zeros(20, 2) + 50000;
+    arrayCost = zeros(20, 2);
     delta = 10e-3;
     i = 1;
     for D = 50:50:1000
         % Generate random W (K x D)
         W = rand(K, D)*2-1;
         % Calculate H = X * W (N x D)
-        Htrain = 1./(1+(exp(-(Xtrain * W))));
-        Htest = 1./(1+(exp(-(Xtest * W))));
+        Htrain = 1 ./ (1 + (exp(-(Xtrain * W))));
+        Htest = 1 ./ (1 + (exp(-(Xtest * W))));
         % Calculate Beta = (H'*H)^-1 * H'*Y (D x J)
         Beta = (inv((Htrain'*Htrain) +(delta * eye(size(Htrain, 2)))))*Htrain'*Ytrain;
         % Generate Y = H*Beta
@@ -86,7 +87,6 @@ function [CCR, MAE, MMAE, tau] = ELM(X, Y)
     Ytraining = Y(1:81,:);
     Ytesting = Y(82:end,:);
 
-    % didn't get this step
     Ytrain = zeros(Ntrain, J);
     for i = 1:Ntrain
         column = Ytraining(i);
@@ -98,19 +98,21 @@ function [CCR, MAE, MMAE, tau] = ELM(X, Y)
         column = Ytesting(i);
         Ytest(i, column) = 1;
     end
-    
-    % D must be optimal
-    D = findOptimalD(Xtrain, Ytrain, Ntrain, K);
+
+    Doptimal = findOptimalD(Xtrain, Ytrain);
 
     % Apply Extreme Learning Machine Algorithm
     delta = 10e-3;
     % Generate W (K x D)
-    W = rand(K, D)*2-1;
+    W = rand(K, Doptimal)*2-1;
     % Calculate H (N x D)
-    Htrain = 1./(1+(exp(-(Xtrain * W))));
-    Htest = 1./(1+(exp(-(Xtest * W))));
-    % Generate Beta = (H'*H)^-1 * H'*Y  (D x J)
-    Beta = (inv((Htrain'*Htrain) + (delta*eye(size(Htrain, 2)))))*Htrain'*Ytrain;
+    Htrain = 1 ./ (1 + (exp(-(Xtrain * W))));
+    Htest = 1 ./ (1 + (exp(-(Xtest * W))));
+    % Beta = [(H'*H)^-1] * (H' * Y)
+    % note: Beta is (D x J)
+    % note: eye(D) creates a diagonal identity matrix DxD
+    % note: we add H'*H a perturbation term, so the determinant is not 0
+    Beta = (inv((Htrain'*Htrain) + (delta * eye(Doptimal)))) * Htrain'*Ytrain;
     % Calculate Y (N x J)
     Ypredicted = Htest*Beta;
 
