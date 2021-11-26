@@ -32,7 +32,7 @@ disp("RATE AGENCY 1) S&P: ")
 showResult(D_optimal1,CCR1,CCR_ELM1);
 
 % Get optimal value of D agency 2
-D_optimal2 = findOptimalD(Xtrain,Ytrain1,Ntrain,K);
+D_optimal2 = findOptimalD(Xtrain,Ytrain2,Ntrain,K);
 % Apply Extreme Learning Machine agency 2
 [Ypredicted2,CCR2,CCR_ELM2] = extremeLearningMachine(Xtrain,Ytrain2,Xtest,Ytest2,Ntrain,Ntest,K,D_optimal2);
 % Show results agency 2
@@ -40,7 +40,7 @@ disp("RATE AGENCY 2) Moodys: ")
 showResult(D_optimal2,CCR2,CCR_ELM2);
 
 % Get optimal value of D agency 3
-D_optimal3 = findOptimalD(Xtrain,Ytrain1,Ntrain,K);
+D_optimal3 = findOptimalD(Xtrain,Ytrain3,Ntrain,K);
 % Apply Extreme Learning Machine agency 3
 [Ypredicted3,CCR3,CCR_ELM3] = extremeLearningMachine(Xtrain,Ytrain3,Xtest,Ytest3,Ntrain,Ntest,K,D_optimal3);
 % Show results agency 3
