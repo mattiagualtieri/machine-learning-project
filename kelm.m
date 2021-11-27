@@ -24,6 +24,7 @@ Y = D(:,3);
 [CCR, MAE, MMAE] = KELM(X, Y);
 showResults(CCR, MAE, MMAE);
 
+
 % --- functions ---
 
 % Kernel Extreme Learning Machine function
