@@ -8,23 +8,26 @@ D = load('data.csv');
 
 % X matrix
 X = D(:,4:end);
-% Y = S&P
-Y = D(:,1);
-fprintf('Starting S&P...\n');
-CCR = KELM(X, Y);
-fprintf('Terminated Kernel ELM algorithm\n');
-string = ['CCR = ', num2str(CCR)];
-fprintf(string);
-fprintf('\n');
-string = ['Mean CCR = ', num2str(mean(CCR))];
-fprintf(string);
-fprintf('\n\n');
 
+fprintf('--- S&P ---\n');
+Y = D(:,1);
+[CCR, MAE, MMAE] = KELM(X, Y);
+showResults(CCR, MAE, MMAE);
+
+fprintf('--- Moodys ---\n');
+Y = D(:,2);
+[CCR, MAE, MMAE] = KELM(X, Y);
+showResults(CCR, MAE, MMAE);
+
+fprintf('--- Fitch ---\n');
+Y = D(:,3);
+[CCR, MAE, MMAE] = KELM(X, Y);
+showResults(CCR, MAE, MMAE);
 
 % --- functions ---
 
 % Kernel Extreme Learning Machine function
-function [CCR] = KELM(X, Y)
+function [CCR, MAE, MMAE] = KELM(X, Y)
 
     % X scaling and normalization
     Xs = scaleData(X);
@@ -35,6 +38,7 @@ function [CCR] = KELM(X, Y)
     % using 2010 data for test
     Xtrain = Xn(1:81,:);
     Xtest = Xn(82:end,:);
+    
     [Ntrain, ~] = size(Xtrain);
     [Ntest, ~] = size(Xtest);
 
@@ -46,9 +50,7 @@ function [CCR] = KELM(X, Y)
     Ytest = fromColumnToMatrix(Y(82:end,:));
 
     [C, sigma] = findOptimalHyperparameters(Xtrain, Ytrain);
-    fprintf('Found optimal hyperparameters\n');
-    fprintf('C = %d\n', C);
-    fprintf('sigma = %d\n', sigma);
+    fprintf('C: %d, sigma: %d\n', C, sigma);
 
     % Apply Kernel Extreme Learning Machine
     % Generate omega
@@ -65,7 +67,14 @@ function [CCR] = KELM(X, Y)
         predicts(i, position) = 1;
     end
     CCR = sum(predicts == Ytest)/Ntest;
-
+    
+    % Calculate MAE and MMAE
+    predictsValues = fromMatrixToColumn(predicts);
+    YtestValues = fromMatrixToColumn(Ytest);
+    
+    MAE = sum(abs(predictsValues - YtestValues))/Ntest;
+    MMAE = max(abs(predictsValues - YtestValues));
+    
 end
 
 % Find optimal hyperparameters function
@@ -171,4 +180,9 @@ end
 % Data normalization function
 function [Xn] = normalizeData(X)
     Xn = (X - min(X)) ./ (max(X) - min(X));
+end
+
+% Show results function
+function showResults(CCR, MAE, MMAE)
+    fprintf('Mean CCR: %f, MAE: %.4f, MMAE: %d\n', mean(CCR), MAE, MMAE);
 end
