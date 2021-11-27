@@ -46,7 +46,6 @@ showResult(C_optimal2,D_optimal2,CCR2,CCR_ELM2);
 % Show results agency 3
 disp("RATE AGENCY 3) Fitch: ")
 showResult(C_optimal3,D_optimal3,CCR3,CCR_ELM3);
-
 % ===========================================================  %
 
 % ===========================================================  %
@@ -66,7 +65,7 @@ end
 function [C_optimal,D_optimal] = findOptimalHyperparameters(Xtrain,Ytrain,Ntrain,K)
     
     % Split training data into trainVal and testVal
-    CVHoldOut = cvpartition(Ntrain,'HoldOut',0.25);
+    CVHoldOut = cvpartition(Ntrain,'HoldOut',0.25,'Stratify',false);
 
     NtrainVal = CVHoldOut.TrainSize;
     NtestVal = CVHoldOut.TestSize;
