@@ -62,32 +62,30 @@ YvalFitch = YtrainFitch(index,:);
 
 %AGENCIA SP
 
-%Encontramos los hiperparametros optimos (C y D) para SP
+%Encontramos el hiperparametro optimo D para SP
 i = 1;
-for C=-10e-3:1000:10000
-    for D=50:50:2000
-        w = rand(K,D)*2-1;
-        Htrain = 1./(1+(exp(-(Xtrainval*w))));
-        Htest = 1./(1+(exp(-(Xval*w))));
-        Beta = (inv((eye(D)/C)+(Htrain'*Htrain)))*(Htrain'*YtrainvalSP);
-        Ypredicted = Htest*Beta;
-        L = norm(YvalSP - Ypredicted);
-        rowSP(i,1) = L;
-        rowSP(i,2) = C;
-        rowSP(i,3) = D;
-        i = i + 1;
-    end
+delta = 10e-3;
+for D=50:50:2000
+    w = rand(K,D)*2-1;
+    Htrain = 1./(1+(exp(-(Xtrainval*w))));
+    Htest = 1./(1+(exp(-(Xval*w))));
+    Beta = (inv((Htrain'*Htrain) +(delta*eye(size(Htrain,2)))))*Htrain'*YtrainvalSP;
+    Ypredicted = Htest*Beta;
+    L = norm(YvalSP - Ypredicted);
+    rowSP(i,1) = L;
+    rowSP(i,2) = D;
+    i = i + 1;
 end
 L_optimal_SP = min(rowSP(:,1));
 [L_row, L_col] = find(rowSP == L_optimal_SP);
-C_optimal_SP = rowSP(L_row,2);
-D_optimal_SP = rowSP(L_row,3);
+D_optimal_SP = rowSP(L_row,2);
+%D_optimal_SP = min(row(:,2));
 
-%Ahora ejecutamos el algoritmo ELM con los hiperparametros optimos de SP
+%Ahora ejecutamos el algoritmo ELM con el hiperparametro optimo de SP
 w = rand(K,D_optimal_SP)*2-1;
 Htrain = 1./(1+(exp(-(Xtrain*w))));
 Htest = 1./(1+(exp(-(Xtest*w))));
-Beta = (inv((eye(D_optimal_SP)/C_optimal_SP)+(Htrain'*Htrain)))*(Htrain'*YtrainSP);
+Beta = (inv((Htrain'*Htrain) +(delta*eye(size(Htrain,2)))))*Htrain'*YtrainSP;
 Ypredicted = Htest*Beta;
     
 % Calculamos el CCR de la Agencia SP
@@ -105,32 +103,29 @@ CCR_ELM_SP = mean(CCR_SP);
 
 %AGENCIA MOODY
 
-%Encontramos los hiperparametros optimos (C y D) para Moody
+%Encontramos el hiperparametro optimo D para Moody
 i = 1;
-for C=-10e-3:1000:10000
-    for D=50:50:2000
-        w = rand(K,D)*2-1;
-        Htrain = 1./(1+(exp(-(Xtrainval*w))));
-        Htest = 1./(1+(exp(-(Xval*w))));
-        Beta = (inv((eye(D)/C)+(Htrain'*Htrain)))*(Htrain'*YtrainvalMoody);
-        Ypredicted = Htest*Beta;
-        L = norm(YvalMoody - Ypredicted);
-        rowMoody(i,1) = L;
-        rowMoody(i,2) = C;
-        rowMoody(i,3) = D;
-        i = i + 1;
-    end
+for D=50:50:2000
+    w = rand(K,D)*2-1;
+    Htrain = 1./(1+(exp(-(Xtrainval*w))));
+    Htest = 1./(1+(exp(-(Xval*w))));
+    Beta = (inv((Htrain'*Htrain) +(delta*eye(size(Htrain,2)))))*Htrain'*YtrainvalMoody;
+    Ypredicted = Htest*Beta;
+    L = norm(YvalMoody - Ypredicted);
+    rowMoody(i,1) = L;
+    rowMoody(i,2) = D;
+    i = i + 1;
 end
 L_optimal_Moody = min(rowMoody(:,1));
 [L_row, L_col] = find(rowMoody == L_optimal_Moody);
-C_optimal_Moody = rowMoody(L_row,2);
-D_optimal_Moody = rowMoody(L_row,3);
+D_optimal_Moody = rowMoody(L_row,2);
+%D_optimal_Moody = min(row(:,2));
 
-%Ahora ejecutamos el algoritmo ELM con los hiperparametros optimos de Moody
+%Ahora ejecutamos el algoritmo ELM con el hiperparametro optimo de Moody
 w = rand(K,D_optimal_Moody)*2-1;
 Htrain = 1./(1+(exp(-(Xtrain*w))));
 Htest = 1./(1+(exp(-(Xtest*w))));
-Beta = (inv((eye(D_optimal_Moody)/C_optimal_Moody)+(Htrain'*Htrain)))*(Htrain'*YtrainMoody);
+Beta = (inv((Htrain'*Htrain) +(delta*eye(size(Htrain,2)))))*Htrain'*YtrainMoody;
 Ypredicted = Htest*Beta;
     
 % Calculamos el CCR de la Agencia Moody
@@ -150,32 +145,29 @@ CCR_ELM_Moody = mean(CCR_Moody);
 
 %AGENCIA FITCH
 
-%Encontramos los hiperparametros optimos (C y D) para Fitch
+%Encontramos el hiperparametro optimo D para Fitch
 i = 1;
-for C=-10e-3:1000:10000
-    for D=50:50:2000
-        w = rand(K,D)*2-1;
-        Htrain = 1./(1+(exp(-(Xtrainval*w))));
-        Htest = 1./(1+(exp(-(Xval*w))));
-        Beta = (inv((eye(D)/C)+(Htrain'*Htrain)))*(Htrain'*YtrainvalFitch);
-        Ypredicted = Htest*Beta;
-        L = norm(YvalFitch - Ypredicted);
-        rowFitch(i,1) = L;
-        rowFitch(i,2) = C;
-        rowFitch(i,3) = D;
-        i = i + 1;
-    end
+for D=50:50:2000
+    w = rand(K,D)*2-1;
+    Htrain = 1./(1+(exp(-(Xtrainval*w))));
+    Htest = 1./(1+(exp(-(Xval*w))));
+    Beta = (inv((Htrain'*Htrain) +(delta*eye(size(Htrain,2)))))*Htrain'*YtrainvalFitch;
+    Ypredicted = Htest*Beta;
+    L = norm(YvalFitch - Ypredicted);
+    rowFitch(i,1) = L;
+    rowFitch(i,2) = D;
+    i = i + 1;
 end
 L_optimal_Fitch = min(rowFitch(:,1));
 [L_row, L_col] = find(rowFitch == L_optimal_Fitch);
-C_optimal_Fitch = rowFitch(L_row,2);
-D_optimal_Fitch = rowFitch(L_row,3);
+D_optimal_Fitch = rowFitch(L_row,2);
+%D_optimal_Fitch = min(row(:,2));
 
-%Ahora ejecutamos el algoritmo ELM con los hiperparametros optimos de Fitch
+%Ahora ejecutamos el algoritmo ELM con el hiperparametro optimo de Fitch
 w = rand(K,D_optimal_Fitch)*2-1;
 Htrain = 1./(1+(exp(-(Xtrain*w))));
 Htest = 1./(1+(exp(-(Xtest*w))));
-Beta = (inv((eye(D_optimal_Fitch)/C_optimal_Fitch)+(Htrain'*Htrain)))*(Htrain'*YtrainFitch);
+Beta = (inv((Htrain'*Htrain) +(delta*eye(size(Htrain,2)))))*Htrain'*YtrainFitch;
 Ypredicted = Htest*Beta;
     
 % Calculamos el CCR de la Agencia Fitch
