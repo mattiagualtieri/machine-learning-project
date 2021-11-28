@@ -24,7 +24,7 @@ Ytest2 = generate1ofJLabel(Ytest2,Ntest,J);
 Ytest3 = generate1ofJLabel(Ytest3,Ntest,J);
 
 % Select Rating Agency 
-agency = 2;  % 1 = S&P //  2 = Moodys // 3 = Fitch
+agency = 1;  % 1 = S&P //  2 = Moodys // 3 = Fitch
 
 % ELM Non regularized for agency 1
 if agency == 1
@@ -121,7 +121,7 @@ end
 function [predicts,CCR] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,K,D)
     
     % Apply Extreme Learning Machine Algorithm
-    delta = 10e-3;
+    delta = 10e-5;
     % Generate w (K x D)
     w = rand(K,D)*2-1;
     % Calculate H (N x D)
