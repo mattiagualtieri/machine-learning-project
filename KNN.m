@@ -1,8 +1,8 @@
-% ===========================================================  %
+% ======================================================================= %
 
-% KNN Algorithm 
-% Carlos Cuevas Baliñas
-% Machine Learning - 4º IITV 
+% MACHINE LEARNING PROJECT - MACHINE LEARNING 4ºIITV
+% Group 1: Addressing the EU Sovereign Ratings
+% Álvaro Bersabé, Carlos Cuevas, Mattia Gualtieri, Álvaro Jiménez
 
 % Initial configuration 
 clear all;
@@ -14,33 +14,50 @@ dataset = xlsread('BD_COUNTRY_RISK_EU.ods','BDTOTAL');
 % Prepare data
 [Xtrain,Ytrain1,Ytrain2,Ytrain3,Ntrain,Xtest,Ytest1,Ytest2,Ytest3,Ntest,N,J,K] = initData(dataset);
 
-% Get optimal value of k neighbours agency 1
-k1 = findOptimalNeighbours(Xtrain,Ytrain1,Ntrain);
-% Apply knn algorithm agency 1
-[Ypredicted1,CCR1] = knnAlgorithm(Xtrain,Xtest,k1,Ytrain1,Ytest1,Ntest);
-% Show results agency 1
-disp("RATE AGENCY 1) S&P: ")
-showResult(k1,CCR1);
+% Select Rating Agency 
+agency = 3;  % 1 = S&P //  2 = Moodys // 3 = Fitch
 
-% Get optimal value of k neighbours agency 2
-k2 = findOptimalNeighbours(Xtrain,Ytrain2,Ntrain);
-% Apply knn algorithm agency 2
-[Ypredicted2,CCR2] = knnAlgorithm(Xtrain,Xtest,k2,Ytrain2,Ytest2,Ntest);
-% Show results agency 2
-disp("RATE AGENCY 2) Moodys: ")
-showResult(k2,CCR2);
+% Knn for agency 1
+if agency == 1
+    [Ypredicted,CCR,k] = knn(Xtrain,Xtest,Ytrain1,Ytest1,Ntrain,Ntest);
+    disp("=======================================================================");
+    disp("RATE AGENCY 1) S&P: ")
+    showResult(k,CCR);
+    disp("=======================================================================");
+end
+% Knn for agency 2
+if agency == 2
+    [Ypredicted,CCR,k] = knn(Xtrain,Xtest,Ytrain2,Ytest2,Ntrain,Ntest);
+    disp("=======================================================================");
+    disp("RATE AGENCY 2) Moodys: ")
+    showResult(k,CCR);
+    disp("=======================================================================");
+end
+% Knn for agency 3
+if agency == 3
+    [Ypredicted,CCR,k] = knn(Xtrain,Xtest,Ytrain3,Ytest3,Ntrain,Ntest);
+    disp("=======================================================================");
+    disp("RATE AGENCY 3) Fitch: ")
+    showResult(k,CCR);
+    disp("=======================================================================");
+end
+% Error
+if agency < 1 || agency > 3
+    disp("Error selecting agency");
+end
 
-% Get optimal value of k neighbours agency 3
-k3 = findOptimalNeighbours(Xtrain,Ytrain3,Ntrain);
-% Apply knn algorithm agency 3
-[Ypredicted3,CCR3] = knnAlgorithm(Xtrain,Xtest,k3,Ytrain3,Ytest3,Ntest);
-% Show results agency 3
-disp("RATE AGENCY 3) Fitch: ")
-showResult(k3,CCR3);
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
+function [Ypredicted,CCR,k] = knn(Xtrain,Xtest,Ytrain,Ytest,Ntrain,Ntest)
+    % Get optimal value of k neighbours
+    k = findOptimalNeighbours(Xtrain,Ytrain,Ntrain);
+    % Apply knn algorithm
+    [Ypredicted,CCR] = knnAlgorithm(Xtrain,Xtest,k,Ytrain,Ytest,Ntest);
+end
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function k_optimal = findOptimalNeighbours(Xtrain,Ytrain,Ntrain)
     
     % Split into trainValidation and testValidation
@@ -70,9 +87,9 @@ function k_optimal = findOptimalNeighbours(Xtrain,Ytrain,Ntrain)
     k_optimal = (indexMax * 2) - 1;
     
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function [Ypredicted,CCR] = knnAlgorithm(Xtrain,Xtest,k,Ytrain,Ytest,Ntest)
     
     % Apply knn algorithm
@@ -84,16 +101,13 @@ function [Ypredicted,CCR] = knnAlgorithm(Xtrain,Xtest,k,Ytrain,Ytest,Ntest)
     CCR = sum(Ypredicted == Ytest)/Ntest;
    
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function showResult(k,CCR)
     String1 = ['Optimal k neighbours: ',num2str(k)];
     String2 = ['CCR Knn Algorithm: ',num2str(CCR)];
     disp(String1);
     disp(String2);
-    disp(" ")
 end
-% ===========================================================  %
-
-
+% ======================================================================= %
