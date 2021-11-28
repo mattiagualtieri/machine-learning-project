@@ -1,8 +1,8 @@
-% ===========================================================  %
+% ======================================================================= %
 
-% Extreme Learning Machine Regularized Algorithm 
-% Carlos Cuevas Baliñas
-% Machine Learning - 4º IITV 
+% MACHINE LEARNING PROJECT - MACHINE LEARNING 4ºIITV
+% Group 1: Addressing the EU Sovereign Ratings
+% Álvaro Bersabé, Carlos Cuevas, Mattia Gualtieri, Álvaro Jiménez
 
 % Initial configuration 
 clear all;
@@ -23,32 +23,41 @@ Ytest1 = generate1ofJLabel(Ytest1,Ntest,J);
 Ytest2 = generate1ofJLabel(Ytest2,Ntest,J);
 Ytest3 = generate1ofJLabel(Ytest3,Ntest,J);
 
-% Get optimal value of D agency 1
-D_optimal1 = findOptimalD(Xtrain,Ytrain1,Ntrain,K);
-% Apply Extreme Learning Machine agency 1
-[Ypredicted1,CCR1,CCR_ELM1] = extremeLearningMachine(Xtrain,Ytrain1,Xtest,Ytest1,Ntrain,Ntest,K,D_optimal1);
-% Show results agency 1
-disp("RATE AGENCY 1) S&P: ")
-showResult(D_optimal1,CCR1,CCR_ELM1);
+% Select Rating Agency 
+agency = 3;  % 1 = S&P //  2 = Moodys // 3 = Fitch
 
-% Get optimal value of D agency 2
-D_optimal2 = findOptimalD(Xtrain,Ytrain2,Ntrain,K);
-% Apply Extreme Learning Machine agency 2
-[Ypredicted2,CCR2,CCR_ELM2] = extremeLearningMachine(Xtrain,Ytrain2,Xtest,Ytest2,Ntrain,Ntest,K,D_optimal2);
-% Show results agency 2
-disp("RATE AGENCY 2) Moodys: ")
-showResult(D_optimal2,CCR2,CCR_ELM2);
+% ELM Non regularized for agency 1
+if agency == 1
+    [Ypredicted,CCR,CCR_ELM,D] = elmNonRegularized(Xtrain,Xtest,Ytrain1,Ytest1,Ntrain,Ntest,K);
+    disp("=======================================================================");
+    disp("RATE AGENCY 1) S&P: ")
+    showResult(D,CCR,CCR_ELM);
+    disp("=======================================================================");
+end
+% ELM Non regularized for agency 2
+if agency == 2
+    [Ypredicted,CCR,CCR_ELM,D] = elmNonRegularized(Xtrain,Xtest,Ytrain2,Ytest2,Ntrain,Ntest,K);
+    disp("=======================================================================");
+    disp("RATE AGENCY 2) Moodys: ")
+    showResult(D,CCR,CCR_ELM);
+    disp("=======================================================================");
+end
+% ELM Non regularized for agency 3
+if agency == 3
+    [Ypredicted,CCR,CCR_ELM,D] = elmNonRegularized(Xtrain,Xtest,Ytrain3,Ytest3,Ntrain,Ntest,K);
+    disp("=======================================================================");
+    disp("RATE AGENCY 3) Fitch: ")
+    showResult(D,CCR,CCR_ELM);
+    disp("=======================================================================");
+end
+% Error
+if agency < 1 || agency > 3
+    disp("Error selecting agency");
+end
 
-% Get optimal value of D agency 3
-D_optimal3 = findOptimalD(Xtrain,Ytrain3,Ntrain,K);
-% Apply Extreme Learning Machine agency 3
-[Ypredicted3,CCR3,CCR_ELM3] = extremeLearningMachine(Xtrain,Ytrain3,Xtest,Ytest3,Ntrain,Ntest,K,D_optimal3);
-% Show results agency 3
-disp("RATE AGENCY 3) Fitch: ")
-showResult(D_optimal3,CCR3,CCR_ELM3);
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function Y = generate1ofJLabel(originalY,Ntrain,J)
     
     % Generate class label according to 1 of J
@@ -59,17 +68,23 @@ function Y = generate1ofJLabel(originalY,Ntrain,J)
     end
     
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
+function [Ypredicted,CCR,CCR_ELM,D] = elmNonRegularized(Xtrain,Xtest,Ytrain,Ytest,Ntrain,Ntest,K)
+    % Get optimal value of D
+    D = findOptimalD(Xtrain,Ytrain,Ntrain,K);
+    % Apply Extreme Learning Machine
+    [Ypredicted,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,K,D);
+end
+% ======================================================================= %
+
+% ======================================================================= %
 function D_optimal = findOptimalD(Xtrain,Ytrain,Ntrain,K)
     
     % Split training data into trainVal and testVal
     CVHoldOut = cvpartition(Ntrain,'HoldOut',0.25);
-
-    NtrainVal = CVHoldOut.TrainSize;
-    NtestVal = CVHoldOut.TestSize;
-
+    
     XtrainVal = Xtrain(CVHoldOut.training(),:);
     YtrainVal = Ytrain(CVHoldOut.training(),:);
 
@@ -100,10 +115,10 @@ function D_optimal = findOptimalD(Xtrain,Ytrain,Ntrain,K)
     D_optimal = arrayCost(indexMin,2);
     
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
-function [Ypredicted,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntrain,Ntest,K,D)
+% ======================================================================= %
+function [Ypredicted,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,K,D)
     
     % Apply Extreme Learning Machine Algorithm
     delta = 10e-3;
@@ -128,9 +143,9 @@ function [Ypredicted,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Y
     CCR_ELM = mean(CCR);
    
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function showResult(D,CCR,CCR_ELM)
     String1 = ['Optimal D hyperparameter: ',num2str(D)];
     disp(String1);
@@ -138,6 +153,5 @@ function showResult(D,CCR,CCR_ELM)
     disp(CCR);
     String2 = ['CCR ELM Algorithm Non Regularized: ',num2str(CCR_ELM)];
     disp(String2);
-    disp(" ")
 end
-% ===========================================================  %
+% ======================================================================= %
