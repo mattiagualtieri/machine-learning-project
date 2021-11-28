@@ -1,9 +1,8 @@
+% ======================================================================= %
 
-% ===========================================================  %
-
-% KERNEL KNN Algorithm 
-% Carlos Cuevas Baliñas
-% Machine Learning - 4º IITV 
+% MACHINE LEARNING PROJECT - MACHINE LEARNING 4ºIITV
+% Group 1: Addressing the EU Sovereign Ratings
+% Álvaro Bersabé, Carlos Cuevas, Mattia Gualtieri, Álvaro Jiménez
 
 % Initial configuration 
 clear all;
@@ -16,33 +15,50 @@ dataset = xlsread('BD_COUNTRY_RISK_EU.ods','BDTOTAL');
 % Prepare data
 [Xtrain,Ytrain1,Ytrain2,Ytrain3,Ntrain,Xtest,Ytest1,Ytest2,Ytest3,Ntest,N,J,K] = initData(dataset);
 
-% Find optimal value of k neighbours and sigma parameter agency 1
-k1 = findOptimalNeighbours(Xtrain,Ytrain1,Ntrain);
-% Apply Kernel Knn Algorithm agency 1
-[Ypredicted1,CCR1] = kernelKnnAlgorithm(Xtrain,Xtest,k1,Ytrain1,Ytest1,Ntest);
-% Show results agency 1
-disp("RATE AGENCY 1) S&P: ")
-showResult(k1,CCR1);
+% Select Rating Agency 
+agency = 3;  % 1 = S&P //  2 = Moodys // 3 = Fitch
 
-% Find optimal value of k neighbours and sigma parameter agency 2
-k2 = findOptimalNeighbours(Xtrain,Ytrain2,Ntrain);
-% Apply Kernel Knn Algorithm agency 2
-[Ypredicted2,CCR2] = kernelKnnAlgorithm(Xtrain,Xtest,k2,Ytrain2,Ytest2,Ntest);
-% Show results agency 2
-disp("RATE AGENCY 2) Moodys: ")
-showResult(k2,CCR2);
+% Knn for agency 1
+if agency == 1
+    [Ypredicted,CCR,k] = kernelKNN(Xtrain,Xtest,Ytrain1,Ytest1,Ntrain,Ntest);
+    disp("=======================================================================");
+    disp("RATE AGENCY 1) S&P: ")
+    showResult(k,CCR);
+    disp("=======================================================================");
+end
+% Knn for agency 2
+if agency == 2
+    [Ypredicted,CCR,k] = kernelKNN(Xtrain,Xtest,Ytrain2,Ytest2,Ntrain,Ntest);
+    disp("=======================================================================");
+    disp("RATE AGENCY 2) Moodys: ")
+    showResult(k,CCR);
+    disp("=======================================================================");
+end
+% Knn for agency 3
+if agency == 3
+    [Ypredicted,CCR,k] = kernelKNN(Xtrain,Xtest,Ytrain3,Ytest3,Ntrain,Ntest);
+    disp("=======================================================================");
+    disp("RATE AGENCY 3) Fitch: ")
+    showResult(k,CCR);
+    disp("=======================================================================");
+end
+% Error
+if agency < 1 || agency > 3
+    disp("Error selecting agency");
+end
+% ======================================================================= %
 
-% Find optimal value of k neighbours and sigma parameter agency 3
-k3 = findOptimalNeighbours(Xtrain,Ytrain3,Ntrain);
-% Apply Kernel Knn Algorithm agency 3
-[Ypredicted3,CCR3] = kernelKnnAlgorithm(Xtrain,Xtest,k3,Ytrain3,Ytest3,Ntest);
-% Show results agency 3
-disp("RATE AGENCY 3) Fitch: ")
-showResult(k3,CCR3);
-% ===========================================================  %
+% ======================================================================= %
+function [Ypredicted,CCR,k] = kernelKNN(Xtrain,Xtest,Ytrain,Ytest,Ntrain,Ntest)
+    % Find optimal value of k neighbours
+    k = findOptimalNeighbours(Xtrain,Ytrain,Ntrain);
+    % Apply Kernel Knn Algorithm
+    [Ypredicted,CCR] = kernelKnnAlgorithm(Xtrain,Xtest,k,Ytrain,Ytest,Ntest);
+end
+% ======================================================================= %
 
 
-% ===========================================================  %
+% ======================================================================= %
 function k_optimal = findOptimalNeighbours(Xtrain,Ytrain,Ntrain)
     global sigma;
     % Split data into trainValidation and testValidation
@@ -76,9 +92,9 @@ function k_optimal = findOptimalNeighbours(Xtrain,Ytrain,Ntrain)
     sigma_optimal = arrayCCR(indexMax,3);
     sigma = sigma_optimal;
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function EK = euclideanKernel(Zi,Zj)
 
     % Zi -> Xtrain
@@ -89,9 +105,9 @@ function EK = euclideanKernel(Zi,Zj)
     end
     
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function GK = gaussianKernel(x,y)
     % Radial Basis Function 
     global sigma;
@@ -101,9 +117,9 @@ function GK = gaussianKernel(x,y)
     GK = exp(aux3);
     
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function [Ypredicted,CCR] = kernelKnnAlgorithm(Xtrain,Xtest,k,Ytrain,Ytest,Ntest)
     
     % Apply kernel knn algorithm
@@ -114,9 +130,9 @@ function [Ypredicted,CCR] = kernelKnnAlgorithm(Xtrain,Xtest,k,Ytrain,Ytest,Ntest
     Ypredicted = mode(LabelsKNN')'; 
     CCR = sum(Ypredicted == Ytest)/Ntest;
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function showResult(k,CCR)
     global sigma;
     String1 = ['Optimal k neighbours: ',num2str(k)];
@@ -125,7 +141,6 @@ function showResult(k,CCR)
     disp(String1);
     disp(String2);
     disp(String3);
-    disp(" ")
 end
-% ===========================================================  %
+% ======================================================================= %
 
