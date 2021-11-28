@@ -118,7 +118,7 @@ end
 % ======================================================================= %
 
 % ======================================================================= %
-function [Ypredicted,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,K,D)
+function [predicts,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,K,D)
     
     % Apply Extreme Learning Machine Algorithm
     delta = 10e-3;
