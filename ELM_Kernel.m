@@ -28,26 +28,26 @@ agency = 3;  % 1 = S&P //  2 = Moodys // 3 = Fitch
 
 % ELM Kernel for agency 1
 if agency == 1
-    [Ypredicted,CCR,CCR_ELM,C,sigma] = elmKernel(Xtrain,Xtest,Ytrain1,Ytest1,Ntrain,Ntest);
+    [Ypredicted,CCR,C,sigma] = elmKernel(Xtrain,Xtest,Ytrain1,Ytest1,Ntrain,Ntest);
     disp("=======================================================================");
     disp("RATE AGENCY 1) S&P: ")
-    showResult(C,sigma,CCR,CCR_ELM);
+    showResult(C,sigma,CCR);
     disp("=======================================================================");
 end
 % ELM Kernel for agency 2
 if agency == 2
-    [Ypredicted,CCR,CCR_ELM,C,sigma] = elmKernel(Xtrain,Xtest,Ytrain2,Ytest2,Ntrain,Ntest);
+    [Ypredicted,CCR,C,sigma] = elmKernel(Xtrain,Xtest,Ytrain2,Ytest2,Ntrain,Ntest);
     disp("=======================================================================");
     disp("RATE AGENCY 2) Moodys: ")
-    showResult(C,sigma,CCR,CCR_ELM);
+    showResult(C,sigma,CCR);
     disp("=======================================================================");
 end
 % ELM Kernel for agency 3
 if agency == 3
-    [Ypredicted,CCR,CCR_ELM,C,sigma] = elmKernel(Xtrain,Xtest,Ytrain3,Ytest3,Ntrain,Ntest);
+    [Ypredicted,CCR,C,sigma] = elmKernel(Xtrain,Xtest,Ytrain3,Ytest3,Ntrain,Ntest);
     disp("=======================================================================");
     disp("RATE AGENCY 3) Fitch: ")
-    showResult(C,sigma,CCR,CCR_ELM);
+    showResult(C,sigma,CCR);
     disp("=======================================================================");
 end
 % Error
@@ -70,11 +70,11 @@ end
 % ======================================================================= %
 
 % ======================================================================= %
-function [Ypredicted,CCR,CCR_ELM,C,sigma] = elmKernel(Xtrain,Xtest,Ytrain,Ytest,Ntrain,Ntest)
+function [Ypredicted,CCR,C,sigma] = elmKernel(Xtrain,Xtest,Ytrain,Ytest,Ntrain,Ntest)
     % Get optimal value of C and sigma
     [C,sigma] = findOptimalHyperparameters(Xtrain,Ytrain,Ntrain);
     % Apply Kernel Extreme Learning Machine
-    [Ypredicted,CCR,CCR_ELM] = kernelExtremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntrain,Ntest,C,sigma);
+    [Ypredicted,CCR] = kernelExtremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntrain,Ntest,C,sigma);
 end
 % ======================================================================= %
 
@@ -124,7 +124,7 @@ end
 % ======================================================================= %
 
 % ======================================================================= %
-function [predicts,CCR,CCR_ELM] = kernelExtremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntrain,Ntest,C,sigma)
+function [predicts,CCR] = kernelExtremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntrain,Ntest,C,sigma)
     
     % Generate omega
     omega = generateOmega(Xtrain,Ntrain,sigma);
@@ -140,8 +140,24 @@ function [predicts,CCR,CCR_ELM] = kernelExtremeLearningMachine(Xtrain,Ytrain,Xte
         predicts(i, position) = 1;
     end
     
-    CCR = sum(predicts == Ytest)/Ntest;
-    CCR_ELM = mean(CCR);
+    newYpredicted = generateNON1ofJLabel(predicts);
+    newYtest = generateNON1ofJLabel(Ytest);
+
+    CCR= sum(newYpredicted == newYtest)/Ntest;
+end
+% ======================================================================= %
+
+% ======================================================================= %
+function newY = generateNON1ofJLabel(Y)
+    [N,J] = size(Y);
+    newY = zeros(N,1);
+    for n=1:1:N
+        for j=1:1:J
+            if Y(n,j) == 1
+                newY(n) = j;
+            end
+        end
+    end
 end
 % ======================================================================= %
 
@@ -181,14 +197,12 @@ end
 % ======================================================================= %
 
 % ======================================================================= %
-function showResult(C,sigma,CCR,CCR_ELM)
+function showResult(C,sigma,CCR)
     String1 = ['Optimal C hyperparameter: ',num2str(C)];
     String2 = ['Optimal sigma hyperparameter: ',num2str(sigma)];
     disp(String1);
     disp(String2);
-    disp("CCR per class ELM Algorithm: ");
-    disp(CCR);
-    String3 = ['CCR Kernel ELM Algorithm: ',num2str(CCR_ELM)];
+    String3 = ['CCR Kernel ELM Algorithm: ',num2str(CCR)];
     disp(String3);
 end
 % ======================================================================= %
