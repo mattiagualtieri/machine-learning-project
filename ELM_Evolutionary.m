@@ -204,7 +204,7 @@ end
 % ======================================================================= %
 
 % ======================================================================= %
-function [Ypredicted,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,C,D,w)
+function [predicts,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,C,D,w)
     
     % Extreme Learning Machine algorithm
     % Calculate H 
