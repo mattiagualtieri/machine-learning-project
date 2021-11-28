@@ -25,46 +25,6 @@ printResults('Fitch', CCR, MAE, MMAE, tau);
 
 % --- functions ---
 
-% Find optimal D function
-function [Doptimal] = findOptimalD(X, Y)
-
-    [N, K] = size(X);
-    % split into train and test (25% test, 75% train)
-    cv = cvpartition(N, 'HoldOut', 0.25);
-    index = cv.test;
-    Xtrain = X(~index,:);
-    Ytrain = Y(~index,:);
-    Xtest = X(index,:);
-    Ytest = Y(index,:);
-    Ntrain = cv.TrainSize;
-    Ntest = cv.TestSize;
-    
-    % Find optimal hyperparameter D
-    arrayCost = zeros(20, 2);
-    delta = 10e-3;
-    i = 1;
-    for D = 50:50:1000
-        % Generate random W (K x D)
-        W = rand(K, D)*2-1;
-        % Calculate H = X * W (N x D)
-        Htrain = 1 ./ (1 + (exp(-(Xtrain * W))));
-        Htest = 1 ./ (1 + (exp(-(Xtest * W))));
-        % Calculate Beta = (H'*H)^-1 * H'*Y (D x J)
-        Beta = (inv((Htrain'*Htrain) +(delta * eye(size(Htrain, 2)))))*Htrain'*Ytrain;
-        % Generate Y = H*Beta
-        Ypredicted = Htest*Beta;
-        % Calculate cost L
-        L = norm(Ytest- Ypredicted);
-        % every step we add arrayCost the row [L D]
-        arrayCost(i, 1) = L;
-        arrayCost(i, 2) = D;
-        i = i + 1;
-    end
-    
-    [~, indexMin] = min(arrayCost(:,1));
-    Doptimal = arrayCost(indexMin,2);
-end
-
 % Regularized Extreme Learning Machine function
 function [CCR, MAE, MMAE, tau] = ELM(X, Y)
     [~, K] = size(X);
@@ -99,6 +59,7 @@ function [CCR, MAE, MMAE, tau] = ELM(X, Y)
         Ytest(i, column) = 1;
     end
 
+    % D -> number of hidden neurons
     Doptimal = findOptimalD(Xtrain, Ytrain);
 
     % Apply Extreme Learning Machine Algorithm
@@ -114,7 +75,7 @@ function [CCR, MAE, MMAE, tau] = ELM(X, Y)
     % note: we add H'*H a perturbation term, so the determinant is not 0
     Beta = (inv((Htrain'*Htrain) + (delta * eye(Doptimal)))) * Htrain'*Ytrain;
     % Calculate Y (N x J)
-    Ypredicted = Htest*Beta;
+    Ypredicted = Htest * Beta;
 
     H = size(Ypredicted, 1);
     predicts = zeros(H, 1);
@@ -132,6 +93,45 @@ function [CCR, MAE, MMAE, tau] = ELM(X, Y)
     % MMAE --> maximum MAE
     MMAE = max(abs(predicts - Ytesting));
     
+end
+
+% Find optimal D function
+function [Doptimal] = findOptimalD(X, Y)
+
+    [N, K] = size(X);
+    % split into train and test (25% test, 75% train)
+    cv = cvpartition(N, 'HoldOut', 0.25);
+    index = cv.test;
+    Xtrain = X(~index,:);
+    Ytrain = Y(~index,:);
+    Xtest = X(index,:);
+    Ytest = Y(index,:);
+    
+    % Find optimal hyperparameter D
+    arrayCost = zeros(20, 2);
+    delta = 10e-3;
+    i = 1;
+    for D = 50:50:1000
+        % Generate random W (K x D)
+        W = rand(K, D)*2-1;
+        % Calculate H = X * W (N x D)
+        Htrain = 1 ./ (1 + (exp(-(Xtrain * W))));
+        Htest = 1 ./ (1 + (exp(-(Xtest * W))));
+        % Calculate Beta = (H'*H + P)^-1 * H'*Y (D x J)
+        % P is the perturbation (det != 0)
+        Beta = (inv((Htrain'*Htrain) + (delta * eye(size(Htrain, 2)))))*Htrain'*Ytrain;
+        % Generate Y = H*Beta
+        Ypredicted = Htest * Beta;
+        % Calculate cost L
+        L = norm(Ytest- Ypredicted);
+        % every step we add arrayCost the row [L D]
+        arrayCost(i, 1) = L;
+        arrayCost(i, 2) = D;
+        i = i + 1;
+    end
+    
+    [~, indexMin] = min(arrayCost(:,1));
+    Doptimal = arrayCost(indexMin,2);
 end
 
 % Data scaling function

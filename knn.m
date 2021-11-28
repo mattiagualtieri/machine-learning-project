@@ -73,7 +73,7 @@ function [CCR, MAE, MMAE, tau] = KNN(X, Y)
     K = (2*Kindex) - 1;
 
     % execute k-NN with the optimal K value (K)
-    [cIdx] = knnsearch(Xtrain, Xtest, 'K', k, 'Distance', 'euclidean');
+    [cIdx] = knnsearch(Xtrain, Xtest, 'K', K, 'Distance', 'euclidean');
     LabelsPerPattern = Ytrain(cIdx);
     Ypredicted = mode(LabelsPerPattern')';
     [H, ~] = size(Ytest);
@@ -83,7 +83,7 @@ function [CCR, MAE, MMAE, tau] = KNN(X, Y)
     % MAE --> mean absolute error
     MAE = sum(abs(Ypredicted - Ytest))/H;
     % tau --> the Kendall's tau
-    tau = corr(Ypredicted, Ytest, 'type', 'Kendall');
+    tau = 0;%corr(Ypredicted, Ytest, 'type', 'Kendall');
     % MMAE --> maximum MAE
     MMAE = max(abs(Ypredicted - Ytest));
     
