@@ -1,8 +1,8 @@
-% ===========================================================  %
+% ======================================================================= %
 
-% Extreme Learning Machine Evolutionary Algorithm 
-% Carlos Cuevas Baliñas
-% Machine Learning - 4º IITV 
+% MACHINE LEARNING PROJECT - MACHINE LEARNING 4ºIITV
+% Group 1: Addressing the EU Sovereign Ratings
+% Álvaro Bersabé, Carlos Cuevas, Mattia Gualtieri, Álvaro Jiménez
 
 % Initial configuration 
 clear all;
@@ -23,35 +23,49 @@ Ytest1 = generate1ofJLabel(Ytest1,Ntest,J);
 Ytest2 = generate1ofJLabel(Ytest2,Ntest,J);
 Ytest3 = generate1ofJLabel(Ytest3,Ntest,J);
 
-% Define value of C and D hyperparameters
-C = 1000;
-D = 200;
-
 % Define number of generations G and population size P
 G = 10;
 P = 20;
 
-% Evolutionary Extreme Learning Machine agency 1 
-w1 = evolutionaryExtremeLearningMachine(Xtrain,Ytrain1,Ntrain,K,C,D,P,G);
-[Ypredicted1,CCR1,CCR_ELM1] = extremeLearningMachine(Xtrain,Ytrain1,Xtest,Ytest1,Ntrain,Ntest,C,D,w1);
-disp("RATE AGENCY 1) S&P: ")
-showResult(C,D,CCR1,CCR_ELM1);
+% Define value of C and D hyperparameters
+C = 1000;
+D = 200;
 
-% Evolutionary Extreme Learning Machine agency 2
-w2 = evolutionaryExtremeLearningMachine(Xtrain,Ytrain2,Ntrain,K,C,D,P,G);
-[Ypredicted2,CCR2,CCR_ELM2] = extremeLearningMachine(Xtrain,Ytrain2,Xtest,Ytest2,Ntrain,Ntest,C,D,w2);
-disp("RATE AGENCY 2) Moodys: ")
-showResult(C,D,CCR2,CCR_ELM2);
+% Select Rating Agency 
+agency = 2;  % 1 = S&P //  2 = Moodys // 3 = Fitch
 
-% Evolutionary Extreme Learning Machine agency 3
-w3 = evolutionaryExtremeLearningMachine(Xtrain,Ytrain3,Ntrain,K,C,D,P,G);
-[Ypredicted3,CCR3,CCR_ELM3] = extremeLearningMachine(Xtrain,Ytrain3,Xtest,Ytest3,Ntrain,Ntest,C,D,w3);
-disp("RATE AGENCY 3) Fitch: ")
-showResult(C,D,CCR3,CCR_ELM3);
+% ELM Evolutionary for agency 1
+if agency == 1
+    [Ypredicted,CCR,CCR_ELM,w] = elmEvolutionary(Xtrain,Xtest,Ytrain1,Ytest1,Ntrain,Ntest,K,C,D,P,G);
+    disp("=======================================================================");
+    disp("RATE AGENCY 1) S&P: ")
+    showResult(C,D,CCR,CCR_ELM);
+    disp("=======================================================================");
+end
+% ELM Evolutionary for agency 2
+if agency == 2
+    [Ypredicted,CCR,CCR_ELM,w] = elmEvolutionary(Xtrain,Xtest,Ytrain2,Ytest2,Ntrain,Ntest,K,C,D,P,G);
+    disp("=======================================================================");
+    disp("RATE AGENCY 2) Moodys: ")
+    showResult(C,D,CCR,CCR_ELM);
+    disp("=======================================================================");
+end
+% ELM Evolutionary for agency 3
+if agency == 3
+    [Ypredicted,CCR,CCR_ELM,w] = elmEvolutionary(Xtrain,Xtest,Ytrain3,Ytest3,Ntrain,Ntest,K,C,D,P,G);
+    disp("=======================================================================");
+    disp("RATE AGENCY 3) Fitch: ")
+    showResult(C,D,CCR,CCR_ELM);
+    disp("=======================================================================");
+end
+% Error
+if agency < 1 || agency > 3
+    disp("Error selecting agency");
+end
 
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function Y = generate1ofJLabel(originalY,Ntrain,J)
     
     % Generate class label according to 1 of J
@@ -62,17 +76,22 @@ function Y = generate1ofJLabel(originalY,Ntrain,J)
     end
     
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
+function [Ypredicted,CCR,CCR_ELM,w] = elmEvolutionary(Xtrain,Xtest,Ytrain,Ytest,Ntrain,Ntest,K,C,D,P,G)
+    % Evolutionary Extreme Learning Machine
+    w = evolutionaryExtremeLearningMachine(Xtrain,Ytrain,Ntrain,K,C,D,P,G);
+    [Ypredicted,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,C,D,w);
+end
+% ======================================================================= %
+
+% ======================================================================= %
 function w = evolutionaryExtremeLearningMachine(Xtrain,Ytrain,Ntrain,K,C,D,P,G)
     
     % Split training data into trainVal and testVal
     CVHoldOut = cvpartition(Ntrain,'HoldOut',0.25);
-
-    NtrainVal = CVHoldOut.TrainSize;
-    NtestVal = CVHoldOut.TestSize;
-
+    
     XtrainVal = Xtrain(CVHoldOut.training(),:);
     YtrainVal = Ytrain(CVHoldOut.training(),:);
 
@@ -144,9 +163,9 @@ function w = evolutionaryExtremeLearningMachine(Xtrain,Ytrain,Ntrain,K,C,D,P,G)
     end
     w = W(:,:,1);
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function [arrayW,arrayCost] = initPopulation(XtrainVal,YtrainVal,XtestVal,YtestVal,K,C,D,P)
     
     % Generate first population
@@ -169,9 +188,9 @@ function [arrayW,arrayCost] = initPopulation(XtrainVal,YtrainVal,XtestVal,YtestV
         arrayW(:,:,p) = wp; %#ok  
     end
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function W = sortW(arrayCost,arrayW)
     % Sort
     arrayCostSorted = sortrows(arrayCost,2);
@@ -182,10 +201,10 @@ function W = sortW(arrayCost,arrayW)
         W(:,:,i) = wi; %#ok 
     end
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
-function [Ypredicted,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntrain,Ntest,C,D,w)
+% ======================================================================= %
+function [Ypredicted,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,C,D,w)
     
     % Extreme Learning Machine algorithm
     % Calculate H 
@@ -206,9 +225,9 @@ function [Ypredicted,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Y
     CCR = sum(predicts == Ytest)/Ntest;
     CCR_ELM = mean(CCR);
 end
-% ===========================================================  %
+% ======================================================================= %
 
-% ===========================================================  %
+% ======================================================================= %
 function showResult(C,D,CCR,CCR_ELM)
     String1 = ['Optimal C hyperparameter: ',num2str(C)];
     String2 = ['Optimal D hyperparameter: ',num2str(D)];
@@ -218,9 +237,8 @@ function showResult(C,D,CCR,CCR_ELM)
     disp(CCR);
     String3 = ['CCR ELM Algorithm Regularized: ',num2str(CCR_ELM)];
     disp(String3);
-    disp(" ")
 end
-% ===========================================================  %
+% ======================================================================= %
 
 
 
