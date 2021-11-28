@@ -36,26 +36,26 @@ agency = 2;  % 1 = S&P //  2 = Moodys // 3 = Fitch
 
 % ELM Evolutionary for agency 1
 if agency == 1
-    [Ypredicted,CCR,CCR_ELM,w] = elmEvolutionary(Xtrain,Xtest,Ytrain1,Ytest1,Ntrain,Ntest,K,C,D,P,G);
+    [Ypredicted,CCR,w] = elmEvolutionary(Xtrain,Xtest,Ytrain1,Ytest1,Ntrain,Ntest,K,C,D,P,G);
     disp("=======================================================================");
     disp("RATE AGENCY 1) S&P: ")
-    showResult(C,D,CCR,CCR_ELM);
+    showResult(C,D,CCR);
     disp("=======================================================================");
 end
 % ELM Evolutionary for agency 2
 if agency == 2
-    [Ypredicted,CCR,CCR_ELM,w] = elmEvolutionary(Xtrain,Xtest,Ytrain2,Ytest2,Ntrain,Ntest,K,C,D,P,G);
+    [Ypredicted,CCR,w] = elmEvolutionary(Xtrain,Xtest,Ytrain2,Ytest2,Ntrain,Ntest,K,C,D,P,G);
     disp("=======================================================================");
     disp("RATE AGENCY 2) Moodys: ")
-    showResult(C,D,CCR,CCR_ELM);
+    showResult(C,D,CCR);
     disp("=======================================================================");
 end
 % ELM Evolutionary for agency 3
 if agency == 3
-    [Ypredicted,CCR,CCR_ELM,w] = elmEvolutionary(Xtrain,Xtest,Ytrain3,Ytest3,Ntrain,Ntest,K,C,D,P,G);
+    [Ypredicted,CCR,w] = elmEvolutionary(Xtrain,Xtest,Ytrain3,Ytest3,Ntrain,Ntest,K,C,D,P,G);
     disp("=======================================================================");
     disp("RATE AGENCY 3) Fitch: ")
-    showResult(C,D,CCR,CCR_ELM);
+    showResult(C,D,CCR);
     disp("=======================================================================");
 end
 % Error
@@ -79,10 +79,10 @@ end
 % ======================================================================= %
 
 % ======================================================================= %
-function [Ypredicted,CCR,CCR_ELM,w] = elmEvolutionary(Xtrain,Xtest,Ytrain,Ytest,Ntrain,Ntest,K,C,D,P,G)
+function [Ypredicted,CCR,w] = elmEvolutionary(Xtrain,Xtest,Ytrain,Ytest,Ntrain,Ntest,K,C,D,P,G)
     % Evolutionary Extreme Learning Machine
     w = evolutionaryExtremeLearningMachine(Xtrain,Ytrain,Ntrain,K,C,D,P,G);
-    [Ypredicted,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,C,D,w);
+    [Ypredicted,CCR] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,C,D,w);
 end
 % ======================================================================= %
 
@@ -204,7 +204,7 @@ end
 % ======================================================================= %
 
 % ======================================================================= %
-function [predicts,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,C,D,w)
+function [predicts,CCR] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,C,D,w)
     
     % Extreme Learning Machine algorithm
     % Calculate H 
@@ -222,20 +222,35 @@ function [predicts,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Yte
         [~, position] = max(Ypredicted(i,:));
         predicts(i, position) = 1;
     end
-    CCR = sum(predicts == Ytest)/Ntest;
-    CCR_ELM = mean(CCR);
+    
+    newYpredicted = generateNON1ofJLabel(predicts);
+    newYtest = generateNON1ofJLabel(Ytest);
+
+    CCR= sum(newYpredicted == newYtest)/Ntest;
 end
 % ======================================================================= %
 
 % ======================================================================= %
-function showResult(C,D,CCR,CCR_ELM)
+function newY = generateNON1ofJLabel(Y)
+    [N,J] = size(Y);
+    newY = zeros(N,1);
+    for n=1:1:N
+        for j=1:1:J
+            if Y(n,j) == 1
+                newY(n) = j;
+            end
+        end
+    end
+end
+% ======================================================================= %
+
+% ======================================================================= %
+function showResult(C,D,CCR)
     String1 = ['Optimal C hyperparameter: ',num2str(C)];
     String2 = ['Optimal D hyperparameter: ',num2str(D)];
     disp(String1);
     disp(String2);
-    disp("CCR per class ELM Algorithm: ");
-    disp(CCR);
-    String3 = ['CCR ELM Algorithm Regularized: ',num2str(CCR_ELM)];
+    String3 = ['CCR ELM Algorithm Regularized: ',num2str(CCR)];
     disp(String3);
 end
 % ======================================================================= %
