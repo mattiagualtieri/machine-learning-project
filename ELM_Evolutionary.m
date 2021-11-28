@@ -32,7 +32,7 @@ C = 1000;
 D = 200;
 
 % Select Rating Agency 
-agency = 2;  % 1 = S&P //  2 = Moodys // 3 = Fitch
+agency = 1;  % 1 = S&P //  2 = Moodys // 3 = Fitch
 
 % ELM Evolutionary for agency 1
 if agency == 1
