@@ -124,7 +124,7 @@ end
 % ======================================================================= %
 
 % ======================================================================= %
-function [Ypredicted,CCR,CCR_ELM] = kernelExtremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntrain,Ntest,C,sigma)
+function [predicts,CCR,CCR_ELM] = kernelExtremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntrain,Ntest,C,sigma)
     
     % Generate omega
     omega = generateOmega(Xtrain,Ntrain,sigma);
