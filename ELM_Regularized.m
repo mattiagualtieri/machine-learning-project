@@ -121,7 +121,7 @@ end
 % ======================================================================= %
 
 % ======================================================================= %
-function [Ypredicted,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,K,C,D)
+function [predicts,CCR,CCR_ELM] = extremeLearningMachine(Xtrain,Ytrain,Xtest,Ytest,Ntest,K,C,D)
     
     % Apply Extreme Learning Machine Algorithm
     % Generate w (K x D)
